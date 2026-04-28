@@ -123,10 +123,10 @@ def test_simple_summarize_zh_github_formats_metadata(monkeypatch):
     sections = simple_summarize([], [item], [])
     text = sections["GitHub 熱門趨勢"]
 
+    assert "重點：與 Codex 相關的熱門專案" in text
     assert "語言：Python" in text
     assert "今日星數：638" in text
     assert "累積星數：3,088" in text
-    assert "主題：Codex" in text
 
 
 def test_clean_description_decodes_html_entities():
@@ -175,10 +175,10 @@ def test_simple_summarize_github_uses_metadata_not_simple_description(monkeypatc
     )
 
     text = simple_summarize([], [item], [])["GitHub 熱門趨勢"]
+    assert "重點：與 語音 AI 相關的熱門專案" in text
     assert "語言：Python" in text
     assert "今日星數：757" in text
     assert "累積星數：43,506" in text
-    assert "主題：語音 AI" in text
 
 
 def test_filter_recent_items_keeps_only_last_24_hours():
@@ -210,8 +210,25 @@ def test_simple_summarize_ai_description_is_brief(monkeypatch):
     )
 
     text = simple_summarize([], [], [item])["AI 新聞"]
-    assert "來源：BBC" in text
+    assert "重點：" in text
+    assert "可點連結看全文" in text
     assert text.count("人工智慧：白宮備忘錄") == 1
+
+
+def test_simple_summarize_ai_limits_total_items(monkeypatch):
+    monkeypatch.setattr(simple_summarizer.config, "SUMMARY_LANGUAGE", "zh-TW")
+    ai_items = [
+        NewsItem(
+            title=f"新聞 {i}",
+            url=f"https://example.com/news-{i}",
+            source="AI News / news.google.com" if i < 8 else "AI News / ithome.com.tw",
+            description="摘要內容",
+        )
+        for i in range(12)
+    ]
+
+    text = simple_summarize([], [], ai_items)["AI 新聞"]
+    assert text.count("- **[") == 9
 
 
 # ── Digest builder ────────────────────────────────────────────────────────────
@@ -268,6 +285,28 @@ def test_openai_summarizer_hybrid_adds_key_points(monkeypatch):
     assert "關鍵重點" in sections
     assert "今日星數：10" in sections["GitHub 熱門趨勢"]
     assert sections["關鍵重點"].startswith("- 重點一")
+
+
+def test_discord_notifier_suppresses_embeds(monkeypatch):
+    from src.notifiers import discord as discord_notifier
+
+    monkeypatch.setattr(discord_notifier.config, "DISCORD_WEBHOOK_URL", "https://example.com/webhook")
+    payloads = []
+
+    class _Resp:
+        def raise_for_status(self):
+            return None
+
+    def _fake_post(url, json, headers, timeout):
+        payloads.append(json)
+        return _Resp()
+
+    monkeypatch.setattr(discord_notifier.requests, "post", _fake_post)
+    ok = discord_notifier.send_digest("- **[title](https://example.com)**\n  重點：摘要")
+
+    assert ok is True
+    assert payloads[0]["flags"] == 4
+
 
 def test_rss_collector_handles_network_error():
     """A failing feed URL should return [] without raising."""

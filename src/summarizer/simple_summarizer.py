@@ -2,11 +2,17 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from itertools import islice
 import html
 import re
 
 from src import config
 from src.collectors.base import NewsItem
+
+_MAX_TWITTER_ITEMS = 5
+_MAX_GITHUB_ITEMS = 5
+_MAX_AI_ITEMS_TOTAL = 10
+_MAX_AI_ITEMS_PER_SOURCE = 5
 
 
 _TOPIC_PATTERNS: list[tuple[re.Pattern[str], str]] = [
@@ -36,6 +42,7 @@ def summarize(
     is_zh = config.SUMMARY_LANGUAGE.lower().startswith(("traditional chinese", "zh", "繁"))
 
     if twitter_items:
+        twitter_items = twitter_items[:_MAX_TWITTER_ITEMS]
         sections["社群 / Twitter" if is_zh else "Twitter / Social"] = (
             _render_section_zh(twitter_items, kind="twitter")
             if is_zh
@@ -43,6 +50,7 @@ def summarize(
         )
 
     if github_items:
+        github_items = github_items[:_MAX_GITHUB_ITEMS]
         sections["GitHub 熱門趨勢" if is_zh else "GitHub Trending"] = (
             _render_section_zh(github_items, kind="github")
             if is_zh
@@ -55,9 +63,16 @@ def summarize(
             by_source[item.source].append(item)
 
         parts: list[str] = []
+        total_used = 0
         for source, items in by_source.items():
-            body = _render_section_zh(items, kind="ai") if is_zh else _render_section(items)
+            if total_used >= _MAX_AI_ITEMS_TOTAL:
+                break
+            limited_items = list(islice(items, 0, min(_MAX_AI_ITEMS_PER_SOURCE, _MAX_AI_ITEMS_TOTAL - total_used)))
+            if not limited_items:
+                continue
+            body = _render_section_zh(limited_items, kind="ai") if is_zh else _render_section(limited_items)
             parts.append(f"**{_clean_text(source)}**\n\n{body}")
+            total_used += len(limited_items)
         sections["AI 新聞" if is_zh else "AI News"] = "\n\n".join(parts)
 
     return sections
@@ -157,17 +172,19 @@ def _github_item_to_zh(item: NewsItem) -> tuple[str, str]:
     total_stars_match = re.search(r"★\s*([\d,]+)", desc)
     core_desc = re.split(r"\s+·\s+[\d,]+\s+stars today", desc, maxsplit=1, flags=re.I)[0].strip(" ·")
 
-    parts = [f"語言：{language}"]
+    topics = _extract_topics(f"{repo_name} {core_desc}")
+    if topics:
+        brief = f"重點：與 {'、'.join(topics)} 相關的熱門專案"
+    elif core_desc:
+        brief = f"重點：{_shorten_text(core_desc, 28)}"
+    else:
+        brief = "重點：值得留意的開發工具 / 專案趨勢"
+
+    parts = [brief, f"語言：{language}"]
     if stars_today_match:
         parts.append(f"今日星數：{stars_today_match.group(1)}")
     if total_stars_match:
         parts.append(f"累積星數：{total_stars_match.group(1)}")
-
-    topics = _extract_topics(f"{repo_name} {core_desc}")
-    if topics:
-        parts.append(f"主題：{'、'.join(topics)}")
-    elif core_desc:
-        parts.append("主題：開發工具 / 專案趨勢")
 
     return repo_name, "；".join(parts) + "。"
 
@@ -180,9 +197,26 @@ def _ai_item_to_zh(item: NewsItem) -> tuple[str, str]:
     return title, description
 
 
+def _topic_based_brief(title: str) -> str:
+    title_lower = title.lower()
+    if "copilot" in title_lower:
+        return "重點：與 GitHub Copilot 產品或商業模式調整有關。"
+    if "馬斯克" in title or "elon" in title_lower or "x money" in title_lower or "tesla" in title_lower:
+        return "重點：與馬斯克、X 或 Tesla 的最新動向有關。"
+    if any(word in title_lower for word in ["bitcoin", "ethereum", "加密", "幣", "crypto"]):
+        return "重點：與加密貨幣市場、交易或政策變化有關。"
+    if any(word in title for word in ["白宮", "烏克蘭", "俄羅斯", "歐盟", "中國", "美國"]):
+        return "重點：與國際政治、政策或地緣局勢有關。"
+    if any(word in title_lower for word in ["llm", "gemini", "openai", "ai", "人工智慧"]):
+        return "重點：與 AI 模型、產品或產業進展有關。"
+    if any(word in title for word in ["資安", "駭", "漏洞"]):
+        return "重點：與資安事件或漏洞修補進展有關。"
+    return "重點：與今日重要科技或市場動態有關。"
+
+
 def _simplify_ai_description(title: str, description: str) -> str:
     if not description:
-        return ""
+        return _topic_based_brief(title)
 
     normalized_title = _clean_text(title)
     normalized_description = _clean_text(description)
@@ -190,13 +224,15 @@ def _simplify_ai_description(title: str, description: str) -> str:
     if normalized_description.startswith(normalized_title):
         remainder = normalized_description[len(normalized_title):].strip(" -|｜:：")
         if remainder and len(remainder) <= 24 and re.search(r"[A-Za-z\u4e00-\u9fff]", remainder):
-            return f"來源：{remainder}。"
+            return f"重點：此消息來自 {remainder}，可點連結看全文。"
         normalized_description = remainder or normalized_description
 
     normalized_description = re.sub(r"^(Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News\.?)+", "", normalized_description, flags=re.I).strip(" -|｜:：")
     if not normalized_description:
-        return ""
-    return _shorten_text(normalized_description, 70)
+        return _topic_based_brief(title)
+    if len(normalized_description) <= 28:
+        return f"重點：{normalized_description}"
+    return f"重點：{_shorten_text(normalized_description, 72)}"
 
 
 def _combined_text(item: NewsItem) -> str:

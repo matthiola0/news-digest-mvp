@@ -26,7 +26,10 @@ def send_digest(markdown: str) -> bool:
     chunks = _chunk_message(markdown)
     success = True
     for i, chunk in enumerate(chunks):
-        payload = {"content": chunk if i > 0 else f"📰 **Daily News Digest**\n\n{chunk}"}
+        payload = {
+            "content": chunk if i > 0 else f"📰 **Daily News Digest**\n\n{chunk}",
+            "flags": 4,
+        }
         try:
             resp = requests.post(
                 webhook_url,
