@@ -13,6 +13,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.collectors.base import NewsItem
+from src.collectors.rss_collector import _clean_description
+from src.summarizer import simple_summarizer
 from src.summarizer.simple_summarizer import summarize as simple_summarize
 from src.digest.builder import build_digest
 
@@ -81,6 +83,54 @@ def test_simple_summarize_ai_groups_by_source():
     text = sections[key]
     assert "arxiv.org" in text
     assert "openai.com" in text
+
+
+def test_simple_summarize_zh_twitter_rewrites_to_concise_chinese(monkeypatch):
+    monkeypatch.setattr(simple_summarizer.config, "SUMMARY_LANGUAGE", "zh-TW")
+    item = NewsItem(
+        title="Pinned: Update: GPT-5.5 and GPT-5.5 Pro are now available in the API.",
+        url="https://example.com/openai-gpt55",
+        source="Twitter / nitter.net",
+        description=(
+            "The model brings higher intelligence and stronger token efficiency "
+            "to complex work, helping tasks get done with fewer retries."
+        ),
+    )
+
+    sections = simple_summarize([item], [], [])
+    text = sections["社群 / Twitter"]
+
+    assert "OpenAI" in text
+    assert "GPT-5.5" in text
+    assert "重點：" in text
+    assert "higher intelligence" not in text
+    assert "token efficiency" not in text
+
+
+def test_simple_summarize_zh_github_formats_metadata(monkeypatch):
+    monkeypatch.setattr(simple_summarizer.config, "SUMMARY_LANGUAGE", "zh-TW")
+    item = NewsItem(
+        title="ComposioHQ/awesome-codex-skills [Python]",
+        url="https://github.com/ComposioHQ/awesome-codex-skills",
+        source="GitHub Trending",
+        description=(
+            "A curated list of practical Codex skills for automating workflows "
+            "across the Codex CLI and API. · 638 stars today ★3,088"
+        ),
+    )
+
+    sections = simple_summarize([], [item], [])
+    text = sections["GitHub 熱門趨勢"]
+
+    assert "語言：Python" in text
+    assert "今日星數：638" in text
+    assert "累積星數：3,088" in text
+    assert "practical Codex skills" not in text
+
+
+def test_clean_description_decodes_html_entities():
+    cleaned = _clean_description("AI新聞&nbsp;&nbsp;<br>重點更新", 100)
+    assert cleaned == "AI新聞 重點更新"
 
 
 # ── Digest builder ────────────────────────────────────────────────────────────

@@ -36,7 +36,10 @@ def _parse_published(entry) -> Optional[datetime]:
 
 
 def _clean_description(text: str, max_chars: int) -> str:
+    import html
     import re
+
+    text = html.unescape(text)
     text = re.sub(r"<[^>]+>", " ", text)        # strip HTML tags
     text = re.sub(r"\s+", " ", text).strip()
     return text[:max_chars] + "…" if len(text) > max_chars else text
