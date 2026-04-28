@@ -22,6 +22,8 @@ jobs:
     name: Generate digest
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
     steps:
       - name: Checkout repository
@@ -64,7 +66,7 @@ jobs:
       # Upload the generated digest as a workflow artifact (90-day retention)
       - name: Upload digest artifact
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: digest-${{ github.run_id }}
           path: output/digest_*.md
