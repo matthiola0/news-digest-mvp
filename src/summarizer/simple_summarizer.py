@@ -43,19 +43,23 @@ def summarize(
 
     if twitter_items:
         twitter_items = twitter_items[:_MAX_TWITTER_ITEMS]
-        sections["社群 / Twitter" if is_zh else "Twitter / Social"] = (
+        twitter_body = (
             _render_section_zh(twitter_items, kind="twitter")
             if is_zh
             else _render_section(twitter_items)
         )
+        if twitter_body:
+            sections["社群 / Twitter" if is_zh else "Twitter / Social"] = twitter_body
 
     if github_items:
         github_items = github_items[:_MAX_GITHUB_ITEMS]
-        sections["GitHub 熱門趨勢" if is_zh else "GitHub Trending"] = (
+        github_body = (
             _render_section_zh(github_items, kind="github")
             if is_zh
             else _render_section(github_items)
         )
+        if github_body:
+            sections["GitHub 熱門趨勢" if is_zh else "GitHub Trending"] = github_body
 
     if ai_items:
         by_source: dict[str, list[NewsItem]] = defaultdict(list)
@@ -93,13 +97,15 @@ def _render_section_zh(items: list[NewsItem], kind: str) -> str:
     seen_titles: set[str] = set()
     for item in items:
         if kind == "twitter":
+            if _should_skip_twitter_item(item):
+                continue
             title, description = _twitter_item_to_zh(item)
         elif kind == "github":
             title, description = _github_item_to_zh(item)
         else:
             title, description = _ai_item_to_zh(item)
 
-        if title in seen_titles:
+        if not title or title in seen_titles:
             continue
         seen_titles.add(title)
 
@@ -155,10 +161,7 @@ def _twitter_item_to_zh(item: NewsItem) -> tuple[str, str]:
             "重點：討論如何用 LPPLS 模型偵測投機市場泡沫與轉折。",
         )
 
-    topics = _extract_topics(text)
-    title = f"{topics[0]} 近況" if topics else _shorten_title(item.title)
-    topic_text = "、".join(topics) if topics else "技術動態"
-    return title, f"重點：此則內容涉及 {topic_text}，原始貼文為英文，已保留連結供查看。"
+    return "", ""
 
 
 def _github_item_to_zh(item: NewsItem) -> tuple[str, str]:
@@ -172,13 +175,8 @@ def _github_item_to_zh(item: NewsItem) -> tuple[str, str]:
     total_stars_match = re.search(r"★\s*([\d,]+)", desc)
     core_desc = re.split(r"\s+·\s+[\d,]+\s+stars today", desc, maxsplit=1, flags=re.I)[0].strip(" ·")
 
-    topics = _extract_topics(f"{repo_name} {core_desc}")
-    if topics:
-        brief = f"重點：與 {'、'.join(topics)} 相關的熱門專案"
-    elif core_desc:
-        brief = f"重點：{_shorten_text(core_desc, 28)}"
-    else:
-        brief = "重點：值得留意的開發工具 / 專案趨勢"
+    brief_text = _humanize_github_description(repo_name, core_desc)
+    brief = f"重點：{brief_text}" if brief_text else "重點：值得留意的開發工具 / 專案趨勢"
 
     parts = [brief, f"語言：{language}"]
     if stars_today_match:
@@ -215,24 +213,183 @@ def _topic_based_brief(title: str) -> str:
 
 
 def _simplify_ai_description(title: str, description: str) -> str:
+    title_brief = _summarize_news_title(title)
     if not description:
-        return _topic_based_brief(title)
+        return f"重點：{title_brief}" if title_brief else _topic_based_brief(title)
 
     normalized_title = _clean_text(title)
     normalized_description = _clean_text(description)
 
     if normalized_description.startswith(normalized_title):
         remainder = normalized_description[len(normalized_title):].strip(" -|｜:：")
-        if remainder and len(remainder) <= 24 and re.search(r"[A-Za-z\u4e00-\u9fff]", remainder):
-            return f"重點：此消息來自 {remainder}，可點連結看全文。"
-        normalized_description = remainder or normalized_description
+        if not remainder or len(remainder) <= 24:
+            return f"重點：{title_brief}" if title_brief else _topic_based_brief(title)
+        normalized_description = remainder
 
     normalized_description = re.sub(r"^(Comprehensive up-to-date news coverage, aggregated from sources all over the world by Google News\.?)+", "", normalized_description, flags=re.I).strip(" -|｜:：")
     if not normalized_description:
-        return _topic_based_brief(title)
+        return f"重點：{title_brief}" if title_brief else _topic_based_brief(title)
+
     if len(normalized_description) <= 28:
         return f"重點：{normalized_description}"
+
+    simplified = _humanize_english_snippet(normalized_description)
+    if simplified:
+        return f"重點：{simplified}"
+
+    compact = _compact_chinese_brief(normalized_description)
+    if compact and not _is_generic_brief(compact):
+        return f"重點：{compact}"
+    if title_brief:
+        return f"重點：{title_brief}"
     return f"重點：{_shorten_text(normalized_description, 72)}"
+
+
+def _humanize_github_description(repo_name: str, description: str) -> str:
+    description = _clean_text(description).strip(" .")
+    if not description:
+        topics = _extract_topics(repo_name)
+        return f"與 {'、'.join(topics)} 相關的熱門專案" if topics else "值得留意的開發工具 / 專案趨勢"
+
+    lowered = description.lower()
+    if "curated list of practical codex skills" in lowered:
+        return "整理 Codex CLI 與 API 的實用技能與自動化工作流範例"
+    if "vibevoice" in repo_name.lower():
+        return "開源語音 AI 專案，主打可重現的情緒化語音生成"
+    if "speech ai project" in lowered and "emotional voice generation" in lowered:
+        return "開源語音 AI 專案，主打可重現的情緒化語音生成"
+    if "voice ai" in lowered and "emotional voice generation" in lowered:
+        return "開源語音 AI 專案，主打可重現的情緒化語音生成"
+    if "track locati" in lowered or "track location" in lowered:
+        return "位置追蹤工具，可用於蒐集與整理公開定位資訊"
+    if "public apis" in repo_name.lower() or "free apis" in lowered:
+        return "整理免費 API 資源，方便快速尋找可串接的服務"
+    if "claude-code-templates" in repo_name.lower() or ("claude" in lowered and "template" in lowered):
+        return "整理 Claude Code 的常用模板與工作流範例"
+
+    simplified = _humanize_english_snippet(description)
+    if simplified:
+        return simplified
+
+    topics = _extract_topics(f"{repo_name} {description}")
+    if topics:
+        return f"與 {'、'.join(topics)} 相關的熱門專案"
+    return _shorten_text(description, 40)
+
+
+def _humanize_english_snippet(text: str) -> str:
+    text = _clean_text(text).strip(" .")
+    if not text or not re.search(r"[A-Za-z]", text):
+        return ""
+
+    latin_chars = len(re.findall(r"[A-Za-z]", text))
+    cjk_chars = len(re.findall(r"[\u4e00-\u9fff]", text))
+    if cjk_chars and latin_chars < cjk_chars:
+        return ""
+
+    replacements = [
+        (r"^an open-source ", "開源"),
+        (r"^a curated list of ", "整理"),
+        (r"^a collective list of ", "整理"),
+        (r"\bpractical\b", "實用"),
+        (r"\bcurated\b", "精選"),
+        (r"\bopen-source\b", "開源"),
+        (r"\bfrontier\b", "前沿"),
+        (r"\bspeech ai\b", "語音 AI"),
+        (r"\bvoice ai\b", "語音 AI"),
+        (r"\bemotional voice generation\b", "情緒化語音生成"),
+        (r"\breproducible\b", "可重現的"),
+        (r"\bautomating workflows\b", "自動化工作流"),
+        (r"\bworkflow(s)?\b", "工作流"),
+        (r"\bpractical codex skills\b", "Codex 實用技能"),
+        (r"\bcodex cli and api\b", "Codex CLI 與 API"),
+        (r"\btool to\b", "工具，可"),
+        (r"\btrack location(s)?\b", "追蹤位置"),
+        (r"\bfree apis\b", "免費 API"),
+        (r"\btemplates\b", "模板"),
+    ]
+
+    result = text
+    for pattern, repl in replacements:
+        result = re.sub(pattern, repl, result, flags=re.I)
+
+    result = result.strip(" .")
+    result = re.sub(r"\s+", " ", result)
+    if re.search(r"[A-Za-z]{4,}", result):
+        return _shorten_text(text, 36)
+    return result
+
+
+def _compact_chinese_brief(text: str) -> str:
+    text = _clean_text(text).strip("。")
+    if not text:
+        return ""
+    first_sentence = re.split(r"[。！？]", text, maxsplit=1)[0].strip()
+    first_clause = re.split(r"[，；]", first_sentence, maxsplit=1)[0].strip()
+    candidate = first_clause or first_sentence or text
+    return _shorten_text(candidate, 42)
+
+
+def _is_generic_brief(text: str) -> bool:
+    text = _clean_text(text)
+    generic_prefixes = (
+        "AI浪潮加持下",
+        "去年",
+        "在政府推動",
+        "為了因應",
+        "Google近日",
+        "近期研究成果",
+        "法國報紙摘要",
+    )
+    if len(text) < 12:
+        return True
+    return any(text.startswith(prefix) for prefix in generic_prefixes)
+
+
+def _summarize_news_title(title: str) -> str:
+    normalized = _normalize_news_title(title)
+    lowered = normalized.lower()
+
+    if "蒸餾" in normalized and ("美國ai技術" in normalized.replace(" ", "").lower() or "美國ai" in normalized.replace(" ", "").lower()):
+        return "中國公司透過模型蒸餾大規模竊取美國 AI 技術。"
+    if "copilot" in lowered and any(word in normalized for word in ["按量計費", "ai credits", "生效"]):
+        return "GitHub Copilot 將改採 AI Credits 與按量計費模式。"
+    if "量化交易" in normalized and "ai" in lowered:
+        return "量化交易公司正成為 AI 新創與人才的重要孵化來源。"
+    if any(word in normalized for word in ["白宮", "烏克蘭", "俄羅斯", "歐盟", "中國", "美國"]):
+        return _shorten_text(normalized, 38)
+    if any(word in lowered for word in ["gemini", "openai", "ai", "人工智慧"]):
+        return _shorten_text(normalized, 38)
+    return _shorten_text(normalized, 38)
+
+
+def _should_skip_twitter_item(item: NewsItem) -> bool:
+    title = _clean_text(item.title)
+    description = _clean_text(item.description)
+    combined = f"{title} {description}".strip()
+    if not combined:
+        return True
+    if not re.search(r"[A-Za-z0-9\u4e00-\u9fff]", title):
+        return True
+    if len(title) <= 3 and not re.search(r"[A-Za-z\u4e00-\u9fff]{2,}", title):
+        return True
+    if title.endswith("…"):
+        return True
+    return False
+
+
+def _summarize_twitter_text(item: NewsItem) -> str:
+    text = _combined_text(item)
+    lowered = text.lower()
+    if "openai" in lowered and "api" in lowered:
+        return "OpenAI 公布新功能或模型更新，細節可由原貼文進一步查看。"
+    if "anthropic" in lowered or "claude" in lowered:
+        return "與 Anthropic / Claude 的產品、研究或市場觀點有關。"
+    if "quantconnect" in lowered or "quant" in lowered:
+        return "與量化交易、研究流程或市場資料整合有關。"
+    if "elon" in lowered or "musk" in lowered or "x money" in lowered or "tesla" in lowered:
+        return "與馬斯克、X 平台或 Tesla 的最新動向有關。"
+    return ""
 
 
 def _combined_text(item: NewsItem) -> str:

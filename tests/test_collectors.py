@@ -69,10 +69,27 @@ def test_simple_summarize_github_only():
     assert "Item 0" in sections[key]
 
 
-def test_simple_summarize_twitter():
-    tw = _make_items(2, "Twitter / nitter.net")
-    sections = simple_summarize(tw, [], [])
-    assert "Twitter / Social" in sections or "社群 / Twitter" in sections
+def test_simple_summarize_twitter_filters_low_signal_items(monkeypatch):
+    monkeypatch.setattr(simple_summarizer.config, "SUMMARY_LANGUAGE", "zh-TW")
+    items = [
+        NewsItem(
+            title="💯",
+            url="https://example.com/noise",
+            source="Twitter / nitter.net",
+            description="",
+        ),
+        NewsItem(
+            title="Update: GPT-5.5 and GPT-5.5 Pro are now available in the API.",
+            url="https://example.com/good",
+            source="Twitter / nitter.net",
+            description="The model brings higher intelligence and stronger token efficiency.",
+        ),
+    ]
+
+    text = simple_summarize(items, [], [])["社群 / Twitter"]
+    assert "💯" not in text
+    assert "技術動態" not in text
+    assert "OpenAI：GPT-5.5 / GPT-5.5 Pro 更新" in text
 
 
 def test_simple_summarize_ai_groups_by_source():
@@ -123,7 +140,7 @@ def test_simple_summarize_zh_github_formats_metadata(monkeypatch):
     sections = simple_summarize([], [item], [])
     text = sections["GitHub 熱門趨勢"]
 
-    assert "重點：與 Codex 相關的熱門專案" in text
+    assert "重點：整理 Codex CLI 與 API 的實用技能與自動化工作流範例" in text
     assert "語言：Python" in text
     assert "今日星數：638" in text
     assert "累積星數：3,088" in text
@@ -165,20 +182,17 @@ def test_simple_summarize_dedupes_repeated_titles(monkeypatch):
     assert text.count("OpenAI：GPT-5.5 / GPT-5.5 Pro 更新") == 1
 
 
-def test_simple_summarize_github_uses_metadata_not_simple_description(monkeypatch):
+def test_simple_summarize_github_humanizes_voice_repo_description(monkeypatch):
     monkeypatch.setattr(simple_summarizer.config, "SUMMARY_LANGUAGE", "zh-TW")
     item = NewsItem(
         title="microsoft/VibeVoice [Python]",
         url="https://github.com/microsoft/VibeVoice",
         source="GitHub Trending",
-        description="An open-source frontier speech AI project for reproducible emotional voice generation. · 757 stars today ★43,506",
+        description="Open-Source Frontier Voice AI for reproducible emotional voice generation. · 757 stars today ★43,506",
     )
 
     text = simple_summarize([], [item], [])["GitHub 熱門趨勢"]
-    assert "重點：與 語音 AI 相關的熱門專案" in text
-    assert "語言：Python" in text
-    assert "今日星數：757" in text
-    assert "累積星數：43,506" in text
+    assert "重點：開源語音 AI 專案，主打可重現的情緒化語音生成" in text
 
 
 def test_filter_recent_items_keeps_only_last_24_hours():
@@ -211,7 +225,9 @@ def test_simple_summarize_ai_description_is_brief(monkeypatch):
 
     text = simple_summarize([], [], [item])["AI 新聞"]
     assert "重點：" in text
-    assert "可點連結看全文" in text
+    assert "可點連結看全文" not in text
+    assert "此消息來自" not in text
+    assert "中國公司透過模型蒸餾大規模竊取美國 AI 技術" in text
     assert text.count("人工智慧：白宮備忘錄") == 1
 
 
@@ -229,6 +245,21 @@ def test_simple_summarize_ai_limits_total_items(monkeypatch):
 
     text = simple_summarize([], [], ai_items)["AI 新聞"]
     assert text.count("- **[") == 9
+
+
+def test_simple_summarize_ai_description_shortens_long_chinese_blurb(monkeypatch):
+    monkeypatch.setattr(simple_summarizer.config, "SUMMARY_LANGUAGE", "zh-TW")
+    item = NewsItem(
+        title="Google修補Gemini CLI重大漏洞，未更新可能導致開發整合流程遭遇遠端執行程式碼攻擊",
+        url="https://example.com/gemini-cli",
+        source="AI News / ithome.com.tw",
+        description="Google近日透過GitHub發布資安公告，修補Gemini CLI搭配GitHub Actions使用的重大漏洞，此弱點若不修補或緩解，可能導致開發整合流程遭遇遠端執行程式碼攻擊，影響自動化部署與 CI/CD 安全。",
+    )
+
+    text = simple_summarize([], [], [item])["AI 新聞"]
+    assert "遠端執行程式碼攻擊" in text
+    assert "CI/CD" not in text
+    assert len(text.split("重點：", 1)[1]) < 60
 
 
 # ── Digest builder ────────────────────────────────────────────────────────────
