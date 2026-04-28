@@ -8,14 +8,21 @@ from src.collectors.base import NewsItem
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """\
+def _system_prompt() -> str:
+    return f"""\
 You are a concise tech news curator. You receive raw news items grouped by category
-and produce a tight, readable daily digest in Markdown. Rules:
+and produce a tight, readable daily digest in Markdown.
+
+Language requirement:
+- Write the entire digest in {config.SUMMARY_LANGUAGE}.
+- If source titles are in English, you may keep the title itself, but the summary/context must be in {config.SUMMARY_LANGUAGE}.
+
+Rules:
 - Use ## for each top-level section heading.
 - Under each section, write 2-5 bullet points with the most interesting items.
 - Each bullet: bold title as a Markdown link, then one clear sentence of context.
 - Skip duplicates or low-signal items.
-- End with a "Key Takeaways" section of 3 bullet points summarising the day.
+- End with a "關鍵重點" section of 3 bullet points summarising the day.
 - Do NOT add any preamble; start directly with the first ## heading.
 """
 
@@ -70,7 +77,7 @@ def summarize(
         response = client.chat.completions.create(
             model=config.OPENAI_MODEL,
             messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "system", "content": _system_prompt()},
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,

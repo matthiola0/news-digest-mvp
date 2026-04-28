@@ -22,6 +22,7 @@ def _int(key: str, default: int) -> int:
 OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "")
+SUMMARY_LANGUAGE: str = os.getenv("SUMMARY_LANGUAGE", "Traditional Chinese")
 
 # ── Sources ───────────────────────────────────────────────────────────────────
 TWITTER_RSS_FEEDS: list[str] = _csv("TWITTER_RSS_FEEDS")

@@ -11,8 +11,14 @@ from src import config
 
 logger = logging.getLogger(__name__)
 
+
+def _title_text() -> str:
+    if config.SUMMARY_LANGUAGE.lower().startswith(("traditional chinese", "zh", "繁")):
+        return "每日新聞摘要"
+    return "Daily News Digest"
+
 _HEADER_TEMPLATE = """\
-# Daily News Digest — {date}
+# {title} — {date}
 
 > Generated at **{time} {tz}**
 > Sources: {source_list}
@@ -36,6 +42,7 @@ def build_digest(
         now = now.astimezone(tz)
 
     header = _HEADER_TEMPLATE.format(
+        title=_title_text(),
         date=now.strftime("%Y-%m-%d"),
         time=now.strftime("%H:%M"),
         tz=config.DIGEST_TIMEZONE,

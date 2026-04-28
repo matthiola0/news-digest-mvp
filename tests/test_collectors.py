@@ -60,23 +60,25 @@ def test_simple_summarize_all_empty():
 def test_simple_summarize_github_only():
     gh = _make_items(3, "GitHub Trending")
     sections = simple_summarize([], gh, [])
-    assert "GitHub Trending" in sections
+    assert "GitHub Trending" in sections or "GitHub 熱門趨勢" in sections
     assert "Twitter" not in "\n".join(sections.keys())
-    assert "Item 0" in sections["GitHub Trending"]
+    key = "GitHub Trending" if "GitHub Trending" in sections else "GitHub 熱門趨勢"
+    assert "Item 0" in sections[key]
 
 
 def test_simple_summarize_twitter():
     tw = _make_items(2, "Twitter / nitter.net")
     sections = simple_summarize(tw, [], [])
-    assert "Twitter / Social" in sections
+    assert "Twitter / Social" in sections or "社群 / Twitter" in sections
 
 
 def test_simple_summarize_ai_groups_by_source():
     ai1 = _make_items(2, "AI News / arxiv.org")
     ai2 = _make_items(2, "AI News / openai.com")
     sections = simple_summarize([], [], ai1 + ai2)
-    assert "AI News" in sections
-    text = sections["AI News"]
+    assert "AI News" in sections or "AI 新聞" in sections
+    key = "AI News" if "AI News" in sections else "AI 新聞"
+    text = sections[key]
     assert "arxiv.org" in text
     assert "openai.com" in text
 
@@ -89,7 +91,7 @@ def test_build_digest_with_sections():
         "AI News": "- [post](url)\n  blurb",
     }
     md = build_digest(sections, "GitHub Trending (3), AI News (5)")
-    assert "# Daily News Digest" in md
+    assert "# Daily News Digest" in md or "# 每日新聞摘要" in md
     assert "## GitHub Trending" in md
     assert "## AI News" in md
 
