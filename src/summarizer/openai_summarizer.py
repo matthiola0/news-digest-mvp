@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import logging
 
+import requests
+
 from src import config
 from src.collectors.base import NewsItem
 
 logger = logging.getLogger(__name__)
+
 
 def _system_prompt() -> str:
     return f"""\
@@ -35,6 +38,33 @@ def _items_to_text(label: str, items: list[NewsItem]) -> str:
         desc = it.description[:400] if it.description else ""
         lines.append(f"- [{it.title}]({it.url}): {desc}")
     return "\n".join(lines)
+
+
+def _describe_exception(exc: Exception) -> str:
+    parts = [f"{type(exc).__name__}: {exc!s}"]
+    if exc.__cause__:
+        parts.append(f"cause={type(exc.__cause__).__name__}: {exc.__cause__!r}")
+    if exc.__context__ and exc.__context__ is not exc.__cause__:
+        parts.append(f"context={type(exc.__context__).__name__}: {exc.__context__!r}")
+    return " | ".join(parts)
+
+
+def _preflight_openai(api_key: str) -> None:
+    url = (config.OPENAI_BASE_URL.rstrip("/") + "/models") if config.OPENAI_BASE_URL else "https://api.openai.com/v1/models"
+    try:
+        response = requests.get(
+            url,
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=15,
+        )
+        logger.info(
+            "OpenAI preflight GET %s -> status=%s content-type=%s",
+            url,
+            response.status_code,
+            response.headers.get("content-type", ""),
+        )
+    except Exception as exc:
+        logger.warning("OpenAI preflight failed: %s", _describe_exception(exc))
 
 
 def summarize(
@@ -73,6 +103,7 @@ def summarize(
     client = OpenAI(api_key=config.OPENAI_API_KEY, **kwargs)
 
     logger.info("Calling OpenAI-compatible API (model=%s)…", config.OPENAI_MODEL)
+    _preflight_openai(config.OPENAI_API_KEY)
     try:
         response = client.chat.completions.create(
             model=config.OPENAI_MODEL,
@@ -86,6 +117,6 @@ def summarize(
         digest_text = response.choices[0].message.content or ""
         return {"digest": digest_text}
     except Exception as exc:
-        logger.warning("OpenAI API call failed (%s); falling back to simple summarizer.", exc)
+        logger.warning("OpenAI API call failed: %s; falling back to simple summarizer.", _describe_exception(exc))
         from src.summarizer import simple_summarizer
         return simple_summarizer.summarize(twitter_items, github_items, ai_items)
