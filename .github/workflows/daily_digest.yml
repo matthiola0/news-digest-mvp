@@ -1,10 +1,10 @@
 name: Daily News Digest
 
-# 08:00 Asia/Taipei = UTC+8, so 08:00 - 08:00 = 00:00 UTC
+# 07:57 Asia/Taipei = UTC+8, so 07:57 - 08:00 = 23:57 UTC (previous day)
 # Cron: minute hour day-of-month month day-of-week
 on:
   schedule:
-    - cron: "0 0 * * *"   # 00:00 UTC = 08:00 Asia/Taipei
+    - cron: "57 23 * * *"   # 23:57 UTC = 07:57 Asia/Taipei
   workflow_dispatch:       # allow manual trigger from GitHub UI
     inputs:
       dry_run:
