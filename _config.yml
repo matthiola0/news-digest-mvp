@@ -1,0 +1,25 @@
+title: Daily News Digest
+description: 每日 AI / 開發 / 量化 / 加密 / 國際新聞自動摘要
+theme: jekyll-theme-minimal
+url: https://news.matthiola.dev
+markdown: kramdown
+permalink: pretty
+
+include:
+  - archives
+
+exclude:
+  - src
+  - tests
+  - scripts
+  - requirements.txt
+  - .github
+  - README.md
+  - .env
+  - .env.example
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

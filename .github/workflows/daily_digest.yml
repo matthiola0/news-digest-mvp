@@ -1,10 +1,10 @@
 name: Daily News Digest
 
-# 07:57 Asia/Taipei = UTC+8, so 07:57 - 08:00 = 23:57 UTC (previous day)
+# 06:57 Asia/Taipei = UTC+8, so 06:57 - 08:00 = 22:57 UTC (previous day)
 # Cron: minute hour day-of-month month day-of-week
 on:
   schedule:
-    - cron: "57 23 * * *"   # 23:57 UTC = 07:57 Asia/Taipei
+    - cron: "57 22 * * *"   # 22:57 UTC = 06:57 Asia/Taipei
   workflow_dispatch:       # allow manual trigger from GitHub UI
     inputs:
       dry_run:
@@ -72,16 +72,25 @@ jobs:
           path: output/digest_*.md
           retention-days: 90
 
-      # Optionally commit the digest back to the repo under output/
+      # Archive the latest digest into archives/YYYY/MM/digest_DD.md
+      # and regenerate the homepage index for GitHub Pages.
+      - name: Archive digest and update index
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          python scripts/archive_digest.py
+          python scripts/update_index.py
+
+      # Commit digest, archive, and updated index back to the repo.
       - name: Commit digest to repository
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f output/digest_*.md
+          git add -f output/digest_*.md archives/ index.md
           if git diff --cached --quiet; then
             echo "Nothing to commit."
           else
-            git commit -m "chore: add digest $(date -u +'%Y-%m-%d')"
+            DATE=$(TZ=Asia/Taipei date +'%Y-%m-%d')
+            git commit -m "chore: add digest $DATE"
             git push
           fi
