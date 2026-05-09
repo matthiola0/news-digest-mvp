@@ -11,6 +11,7 @@ Source repo: [matthiola0/daily-news-digest](https://github.com/matthiola0/daily-
 
 ## 2026 年 五月
 
+- [2026-05-10](/archives/2026/05/digest_10.md) — 每日新聞摘要 — 2026-05-10
 - [2026-05-09](/archives/2026/05/digest_09.md) — 每日新聞摘要 — 2026-05-09
 - [2026-05-08](/archives/2026/05/digest_08.md) — 每日新聞摘要 — 2026-05-08
 - [2026-05-07](/archives/2026/05/digest_07.md) — 每日新聞摘要 — 2026-05-07
