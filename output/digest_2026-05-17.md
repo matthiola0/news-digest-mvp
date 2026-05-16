@@ -1,0 +1,51 @@
+# 每日新聞摘要 — 2026-05-17
+
+> Generated at **07:50 Asia/Taipei**
+> Sources: GitHub Trending (5), AI News (13)
+
+---
+
+## GitHub 熱門趨勢
+
+- **[K-Dense-AI/scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills)**
+  重點：A set of ready to use Agent Skills…；語言：Python；今日星數：669；累積星數：23,109。
+- **[anthropics/skills](https://github.com/anthropics/skills)**
+  重點：Public repository for Agent Skills；語言：Python；今日星數：923；累積星數：135,800。
+- **[awslabs/agent-plugins](https://github.com/awslabs/agent-plugins)**
+  重點：Agent Plugins for AWS equip AI codi…；語言：Shell；今日星數：5；累積星數：721。
+- **[PurpleAILAB/Decepticon](https://github.com/PurpleAILAB/Decepticon)**
+  重點：Autonomous Hacking Agent for Red Te…；語言：Python；今日星數：56；累積星數：3,859。
+- **[HKUDS/CLI-Anything](https://github.com/HKUDS/CLI-Anything)**
+  重點："CLI-Anything: Making ALL Software…；語言：Python；今日星數：371；累積星數：35,123。
+
+---
+
+## AI 新聞
+
+**AI News / ithome.com.tw**
+
+- **[微軟揭露Exchange Server存在8.1分重大漏洞，並已偵測到漏洞利用活動](https://www.ithome.com.tw/news/175877)**
+  重點：本週微軟發布每月例行安全性更新，沒想到週四（5月14日）該公司突然又揭…
+- **[AI持續降低自動化網路攻擊門檻，2025惡意機器人活動霸佔全球網際網路流量4成](https://www.ithome.com.tw/news/175873)**
+  重點：隨著AI技術普及與AI代理快速崛起
+
+**AI News / news.google.com**
+
+- **[芬蘭總統：目前烏克蘭優勢俄羅斯劣勢歐洲可趁機與莫斯科對話](https://news.google.com/rss/articles/CBMiW0FVX3lxTE00M2sybEhSWmFLR19mV0NidjhpVGxwZkxmZmtnQi1zNkJvSHVQVkxJdFZIa3pvYU5udXFKM3djWFpacXNudnBvQnVpRWdPQnQ4UTJrQWpqck9aLU0?oc=5)**
+  重點：芬蘭總統：目前烏克蘭優勢俄羅斯劣勢歐洲可趁機與莫斯科對話
+- **[現貨ETF資金流出跳升至10億美元，Bitcoin價格預測](https://news.google.com/rss/articles/CBMiUEFVX3lxTFBMd3Fna04ySHpUcC1jRXBRWWhSWnNDZkpDZzNnSkstVWEtT0poaGg3RFh0dHJ0Y0Z0OVpLbEd2eld1ZWZXbzA0MUxJTkNHM2JW?oc=5)**
+  重點：現貨ETF資金流出跳升至10億美元，Bitcoin價格預測
+- **[特朗普對台軍售未表態 美國會兩黨促白宮儘快放行](https://news.google.com/rss/articles/CBMi6AJBVV95cUxPWmZheTFtdlVhNGJJaTJ4dFNNb2dkM1FHT0pHZkZmWGVGNzFMMkVWN2w5M1NRLVZvOHo3OE55VWNMamhwWHBCclNHaUZJeXBYajhGX3JkU0o3ZkhDeHZVbGltcUNCRGwzcHhWZjlBajBSQVJuRm1JcXVTUVR5WFc2UjdKdmwwd3g5RV96S3h6d2o2dFdaTUpqVDE5WHFEcHNNUGdfdkV4TDdhM01ranBEUDY3c1ZZLVlzb0J6czZpbnNWN2pxdzdCSVk1LUFqX2Y2N2xldXplZDFtMS1DVlFZZnF3SFJzb1JYR3lsM09sUmpKWEJkTWJ4Zkh1WWlQYWRaTXVOMFRoZ3k4NGh0NFlyX0hOOG8wMG1lNzdOSThuU1E4bkFqYkFRTnR4RjdHOFFNb3NqdWRBV21xZ3VwdXlNNDlqU0Fhd1BmUXdPOUxCNG00N3RicGxtbmlZR2VhVHdwY2xSeXRJM18?oc=5)**
+  重點：特朗普對台軍售未表態 美國會兩黨促白宮儘快放行
+- **[AriseAlpha新AI平台問世 簡化加密貨幣與股票自動交易](https://news.google.com/rss/articles/CBMiOkFVX3lxTE9Md3N0RWFWX3FYNkxsUW9IczkxOUpiZ2JLaWdyNnFvVm0xcFBFQnVleVQtUDk2ZWRGUkE?oc=5)**
+  重點：AriseAlpha新AI平台問世 簡化加密貨幣與股票自動交易
+- **[MORX平台詐騙是真的嗎？台報時訊：MORX平台不是詐騙。不同於傳統金融操作模式，「MORX平台」更重視市場數據分析能力與高頻交易效率，而「MORX平台」近年透過AI金融技術與量化交易架構，建立更完整的智能金融操作環境。市場分析認為，在金融科技快速發展](https://news.google.com/rss/articles/CBMikA5BVV95cUxPTG83NnRDOUV2U2JRQUp6NjBVcWZpa3JaSzFfWFFQdW81UWNYdjNFMmxNVVFBMGVfYUFtTU9VM1c5VGtZdjBrTEd1ZVRmaFhZcWdQQWhpMHNYYUJVS1B1UkdtTElkMFp6V1lkM0cyMGhvR1BUUUs0bFRxNFNPTmhRVmxreVV0d0c0VWl4a3dtcFI4dVpPZ0VJQnJ2bjFzc3UwTnF5QjJMTGgzM1NzNUlYaDVKTS1lNEtSNGJYRVRZbS02OHZlUkx2alMtZU5NREZHcExLMkRKTmF4RUJJU250T0tXSGJoM0VkOUgydDFOWnBDSGJBZkNwRDd5SlhGTTRINE1MVFFYWHNMM3c2OHVQbTVWelNrR3ZwTk84ZS14R0ZrbFQxM01PX3F2TmdwTjhDZjJCeWhwVi1tMnZtNVo0X2M3cTF3U3I5WmpXZDBsaDBuM0JmRnlpdU16Um8yY2FHTVZTNFJZQW9hNzR2Mmp3Z1JjdEFyWXdTWDZScldmSEdSM0JOT2tMNFQ4MURJOFJMQmNnd2RIRjkybmQwbE5rRGQtNUgzRTd2T0U1X01PU24yUzZoVlFJak80VVpyNVhfWVBQSm5JU1V2WnZ3SE9VQjNkaWdmM0JrYTVvUVZnei1jeTF5RGRTNlBKTVo4N1B5aUFxXzdRMGlOQW1JREJ0NDJ3aFBvZl9oaFp3YzVzN0hxWml3cjRQM1AwcHQ5Uks0Q3VDeWduOXJNN0hCRU5EenNzazhXUmVCUDhkemE3d3ItOS1EN01aOV8wQVJZcEc4SDNnWl9VWjVoNGQ3S3B5SFptX2Y3WWxURHNUcHN4dnlHVVM0UFZZTm5JZDJZTjl4UFRMTDFvdVVDNGdYNjIxRjJSdkVoSmJ2YnFfcWYzZzVaclJvQy1yZlpWTTJjT0VMX3dlSDVmNzRWV2E1c2E3VWpKbXNBUG4xOXVUYk1iUFVsNnVFNXNjbnJ1TktCWDdJT0Jibzh1dEs5MDRYN2wtMmNyd1QxOGpUU1F6VkFNV3JKMVNOcWtYaGQ0SDBJY3phNUk3dGxDUGRIU005ZzhIUFJWNDlRTGZRV1FwUFdwUDBjNDQtWFFKY0lHbnh2Qzd4STljbnF3Q3hGeGxvajMwbjFNR2NnOVhOZ1lWV0FwdDRYLVp1QzR3bnQwMzBIWElxMkV1Umo3cUZKTWtSS0NjTGc4elRMTWZBekFzVmxKd3Q2MUpwSnQ2WWVlQklpaEFzYlp2akJCaS1OOVgxZkVoQlVLajlNWElqNmcwX3U0dmpDa1cyN0I1dnVWaVYxVVFLZEVtTTFTNU5XalpzNEc5REIzUFhqaERabjJveUcyQWZoY1VxNEhIRjlNNHh4aDhfNlNmUmJsSlM1d0otZU9KS2swMWIwUlRKX0xHcHg4THdZNUlHRVVaV3pwcHlpbkJlaEkzMjRsaUZ2RHE4bm41T2pKSVRBdXd1NkN6aXB6OWRwM2F5S21wbzA5STk2M29BQmltcml0REJPMUNsUmkyLThsdko4c1NISTgzWE53QlY5blV3NTFRNlRtSk93LXJJYmdMWVdDejcxQnRwbXBqY0F1bXVwRHdENXVqRUVaNWxvcVNZa1RqYVF6aUd6RDJxZDNkV2NGSERlWkd3SDlhSzkxbkg1VEJ3WFUxb1BHVHItazdRUDZiVGhpSG04cTZScHNwX0p4cDlna2dhLVNRTGdiSVpDTGtQUXk1ZlhOQmhOVHIxX1NUSlRxYnIxbUVMd2MtRk5KMFp4MnR4amFmb2ViNUxnNG82cWEzNC1RcW5uMHd3S1hDTjBjclpCMlQwSGdRenpHMDg0N0hjaEJNNExJMHFnelA1TDZRNUR4UzZsNFpXMnRMU09EWnhoVS1CSG9wdHQzWTJ5b0VQeVlQZzY3MlZ5WUlFV2doZzJzN1hwYkhtd3RaUFhfWTl1X1lWRmotMDJqSVhCbFJMMkRIMHRfMkZVZGttX2xCaUcteDlNSEJub0l6aEIwME1oNkRCUC1iY1JZT2tseWVPRzlaNU9HTlVja1IyMUNRTjhIc1hjdU9qTXlsaWNURWZWV0JrZTZVd1ZHMGRSUXlqYTV6TEkxTGt6NEtVWGpXRGNPZ1JMTmlGR3FkeGdEMVhrVk9xYjFDNjZuSmhWTDJzMWJpLXVZMi1HejBSUENvUEhZbkItUWZsWGxLVFBNOEhSaEh5NVlBakNZaU9MTmVCQmJDQ294T0hlemYzcmVudXZEbnFEMkhtbW55WWk0Um5EMmtnZG00ODdLZmZISjdwSlNDRjhVSllLNm11bm00NVFmTFRTMXVxdGhYRTFkQ2tCTnkxbUJlZkRTNGVYN3VPWUdrLUdNaV83QzBHMndZNGs5ZkxhZmZkdFBJS2lmTGktV2hCUzF4OS1pZDZseDU5ZTkwZw?oc=5)**
+  重點：量化交易公司正成為 AI 新創與人才的重要孵化來源。
+
+---
+
+## 關鍵重點
+
+- 微軟揭露Exchange Server存在CVSS評分8.1的重大漏洞，並已偵測到利用活動。  
+- AriseAlpha推出新AI平台，旨在簡化加密貨幣與股票的自動交易。  
+- SpaceX預計在6月上市，估值可能達1.75兆美元，並將成為多行星物種的推動者。
